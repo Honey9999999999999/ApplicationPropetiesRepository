@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: aston-gateway
+
+  # Настройка Eureka (чтобы шлюз знал, где искать сервисы)
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true # Автоматически создает маршруты на основе имен в Eureka
+
+      routes:
+        # Маршрут для User Service (Синхронный HTTP)
+        - id: user-service-route
+          uri: lb://user-service # lb = load balancer, берет адреса из Eureka
+          predicates:
+            - Path=/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: userServiceBreaker
+                fallbackUri: forward:/fallback/user-data # Куда идти при сбое
+
+        # Маршрут для Notification Service (Асинхронный через Kafka)
+        - id: notification-route
+          uri: noop://placeholder # Мы не шлем HTTP дальше, мы шлем в Kafka
+          predicates:
+            - Path=/notify/**
+          filters:
+            - name: KafkaPublishFilter # Имя класса фильтра без слова 'GatewayFilterFactory'
+              args:
+                topic: "user-notifications" # Топик, куда полетят сообщения
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
