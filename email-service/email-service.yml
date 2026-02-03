@@ -1,0 +1,53 @@
+server:
+  port: 8082
+
+spring:
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      # Основные десериализаторы
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        # Указываем делегата для ErrorHandlingDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        # Настройки JSON
+        spring.json.value.default.type: org.example.dto.EmailRequest
+        spring.json.trusted.packages: "*"
+        # Протокол для совместимости (если используется Kafka 3.x/4.x)
+        group.protocol: classic
+  # Настройки почтового сервера (SMTP)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: vsorokin73@gmail.com
+    password: zxyu usae izno jldt
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+    
+# Настройки Swagger UI (SpringDoc)
+springdoc:
+  swagger-ui:
+    path: /email.html
+    operations-sorter: alpha
+  api-docs:
+    path: /api-docs
+
+logging:
+  level:
+    org:
+      springframework:
+        kafka: DEBUG
