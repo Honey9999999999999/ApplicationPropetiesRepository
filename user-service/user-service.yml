@@ -1,4 +1,5 @@
 server:
+  forward-headers-strategy: framework # Помогает сервису понять, что он за Gateway
   port: 8081
 
 spring:
@@ -49,6 +50,12 @@ spring:
         defaultZone: http://discovery:8761/eureka/ # Адрес сервера Discovery
       register-with-eureka: true
       fetch-registry: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
 
 # Настройка логирования
 logging:

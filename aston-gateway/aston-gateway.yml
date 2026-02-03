@@ -24,6 +24,17 @@ spring:
                 name: userServiceBreaker
                 fallbackUri: forward:/fallback/user-data # Куда идти при сбое
 
+        - id: user-swagger-route
+          uri: lb://user-service # lb = load balancer, берет адреса из Eureka
+          predicates:
+            - Path=/usertests/**
+          filters:
+            - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: userServiceBreaker
+                fallbackUri: forward:/fallback/user-data
+
         # Маршрут для Notification Service (Асинхронный через Kafka)
         - id: notification-route
           uri: noop://placeholder # Мы не шлем HTTP дальше, мы шлем в Kafka
